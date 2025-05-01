@@ -43,4 +43,4 @@ while True:
     print("開始檢查資金費率...")
     check_all_funding_rates()
     print("休息 30 分鐘")
-    time.sleep(60 * 30)
+    time.sleep(60)
