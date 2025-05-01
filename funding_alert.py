@@ -2,16 +2,20 @@ import requests
 import time
 from datetime import datetime
 
-# Discord Webhook URL
+# ✅ 你的 Discord Webhook URL
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1367376262309613598/WnzNjfBfZnklLCvkYrlR_lWDMdAIoU_2gHBVX1m-piD6tSrfNtcf8fU0F-xCFNjLph1h"
 
-# 測試用設定：BTCUSDT 門檻設為 10% 保證觸發
+# ✅ Binance 中文站 Proxy API
+BINANCE_PROXY_BASE = "https://api-gateway.binancezh.pro"
+
+# ✅ 監控清單（測試用 BTC 設定為 10% 保證觸發）
 MONITOR_LIST = {
     "BTCUSDT": 10.0,
-    "DOGEUSDT": -0.5,
-    "1000PEPEUSDT": -0.6,
-    "ALPACAUSDT": -0.5,
-    "RNDRUSDT": -0.5
+    # 可加回：
+    # "DOGEUSDT": -0.5,
+    # "1000PEPEUSDT": -0.6,
+    # "ALPACAUSDT": -0.5,
+    # "RNDRUSDT": -0.5
 }
 
 def send_discord_alert(symbol, funding_rate):
@@ -25,8 +29,8 @@ def send_discord_alert(symbol, funding_rate):
     )
     payload = {"content": message}
     try:
-        response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
-        print(f"✅ 發送 Discord 通知狀態碼：{response.status_code}")
+        res = requests.post(DISCORD_WEBHOOK_URL, json=payload)
+        print(f"✅ Discord 通知發送成功：狀態碼 {res.status_code}")
     except Exception as e:
         print(f"❌ 發送 Discord 失敗：{e}")
 
@@ -34,11 +38,10 @@ def check_all_funding_rates():
     print("🚀 開始檢查資金費率...")
     for symbol, threshold in MONITOR_LIST.items():
         try:
-            url = f"https://fapi.binance.com/fapi/v1/premiumIndex?symbol={symbol}"
+            url = f"{BINANCE_PROXY_BASE}/fapi/v1/premiumIndex?symbol={symbol}"
             response = requests.get(url)
             data = response.json()
 
-            # 防呆檢查 API 是否回傳正確欄位
             if "lastFundingRate" not in data:
                 print(f"⚠️ 無法獲取 {symbol} 資金費率，API 回傳：{data}")
                 continue
@@ -47,16 +50,16 @@ def check_all_funding_rates():
             print(f"{symbol} 資金費率為：{rate:.3f}%（門檻 {threshold}）")
 
             if rate <= threshold:
-                print(f"📣 符合條件！準備通知 {symbol}")
+                print(f"📣 符合條件！通知 {symbol}")
                 send_discord_alert(symbol, rate)
             else:
-                print(f"🔍 尚未觸發條件：{rate:.3f}% > {threshold}")
+                print(f"🔍 尚未觸發：{rate:.3f}% > {threshold}")
         except Exception as e:
             print(f"❌ 例外錯誤（{symbol}）：{e}")
-    print("✅ 本輪檢查結束\n")
+    print("✅ 資金費檢查結束\n")
 
-# 監控主迴圈（每 5 秒執行一次）
+# ✅ 每 60 秒掃描一次
 while True:
     check_all_funding_rates()
-    print("⏳ 等待 5 秒後再次檢查...\n")
-    time.sleep(5)
+    print("⏳ 等待 60 秒...\n")
+    time.sleep(60)
