@@ -7,7 +7,7 @@ DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1367376262309613598/WnzN
 
 # 監控幣種與資金費率門檻（百分比）
 MONITOR_LIST = {
-    "BTCUSDT": -0.3,
+    "BTCUSDT": 10.0,
     "DOGEUSDT": -0.5,
     "1000PEPEUSDT": -0.6,
     "ALPACAUSDT": -0.5,
